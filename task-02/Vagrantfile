@@ -89,7 +89,12 @@ EOF
      sudo lxc-attach -n c1 -- sudo yum install -y httpd
      sudo lxc-attach -n c1 -- systemctl start httpd
      sudo lxc-attach -n c2 -- sudo yum install -y php
-     #sudo curl -o /var/lib/lxc/c2/rootfs/var/www/html/info.php https://raw.githubusercontent.com/KatJIeTTo/homestaks/devops-hometasks/info.php
-     sudo lxc-attach -n c2 -- systemctl start php-fpm.service
+     sudo lxc-attach -n c2 -- sudo systemctl start php-fpm
+     sudo curl -o /home/vagrant/httpd.conf https://raw.githubusercontent.com/KatJIeTTo/devops-hometask/main/task-02/httpd.conf
+     sudo curl -o /home/vagrant/info.php https://raw.githubusercontent.com/KatJIeTTo/devops-hometask/main/task-02/info.php
+     sudo rm /var/lib/lxc/c2/rootfs/etc/httpd/conf/httpd.conf
+     sudo cp /home/vagrant/httpd.conf /var/lib/lxc/c2/rootfs/etc/httpd/conf/
+     sudo cp /home/vagrant/info.php /var/lib/lxc/c2/rootfs/var/www/html
+     sudo lxc-attach -n c2 -- sudo systemctl restart httpd
    SHELL
 end
