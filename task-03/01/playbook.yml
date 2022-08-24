@@ -1,0 +1,82 @@
+---
+- name: Playbook by Barney Stinson
+  hosts: all
+  become: yes
+
+
+  tasks:
+
+  - name: Install Apache
+    apt:
+      name: apache2
+      state: latest  
+
+  - name: Install PHP
+    apt:
+      name: php
+      state: latest
+
+  - name: Install mc
+    apt:
+      name: mc
+      state: latest
+  
+  - name: Create directory
+    file:
+      path: /var/www/html/web
+      state: directory
+      mode: '0777'
+  
+  - name: Remove file (delete file)
+    file:
+      path: /var/www/html/index.html
+      state: absent
+  
+  
+  - name: Download web page
+    get_url:
+      url: https://raw.githubusercontent.com/Fenikks/itacademy-devops-files/master/04-5-ansible/index.html
+      dest: /var/www/html/index.html  
+
+  - name: Download second web page
+    get_url:
+      url: https://raw.githubusercontent.com/Fenikks/itacademy-devops-files/master/04-5-ansible/index.php
+      dest: /var/www/html/web/index.php
+
+  - name: Remaster default conf 
+    shell:
+      cmd: |
+          cat > /etc/apache2/sites-available/000-default.conf << EOF
+          <VirtualHost *:80>
+
+          ServerAdmin webmaster@localhost
+          DocumentRoot /var/www/html
+
+          ErrorLog ${APACHE_LOG_DIR}/error.log
+          CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+          </VirtualHost>
+
+          <VirtualHost *:81>
+          DirectoryIndex index.php
+          ServerAdmin webmaster@localhost
+          DocumentRoot /var/www/html/web
+
+          ErrorLog ${APACHE_LOG_DIR}/error.log
+          CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+          </VirtualHost>
+          EOF
+  
+  - name: Remastered port conf 
+    shell:
+      cmd: |
+          cat > /etc/apache2/ports.conf << EOF
+          Listen 80
+          Listen 81
+          EOF
+
+  - name: Reload service Apache
+    systemd:
+      name: apache2.service
+      state: reloaded 
