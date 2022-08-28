@@ -122,7 +122,7 @@
   - name: Start lxc playbook
     shell:
       cmd: | 
-        ansible-playbook -i /home/vagrant/inventory /home/vagrant/playbooklxc.yml
+        sudo ansible-playbook -i /home/vagrant/inventory /home/vagrant/playbooklxc.yml
     
         
   
