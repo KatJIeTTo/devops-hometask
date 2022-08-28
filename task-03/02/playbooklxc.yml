@@ -6,17 +6,19 @@
   tasks:
 
   - name: Lxc create c1
+    become: yes
     lxc_container:
        name: c1
        container_log: true
        template: download
        state: stopped
-       template_options: --dist centos --release 8-Stream --arch amd64 --no-validate 
+       template_options: --dist centos --release 8-Stream --arch amd64 --no-validate --keyserver "hkp://keyserver.ubuntu.com"
 
   - name: Lxc create c2
+    become: yes
     lxc_container:
        name: c2
        container_log: true
        template: download
        state: stopped
-       template_options: --dist centos --release 8-Stream --arch amd64 --no-validate 
+       template_options: --dist centos --release 8-Stream --arch amd64 --no-validate --keyserver "hkp://keyserver.ubuntu.com"

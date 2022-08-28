@@ -19,6 +19,11 @@
       name: gnupg2
       state: latest
 
+  - name: Install gnupg2
+    apt:
+      name: sshpass
+      state: latest
+
   - name: Install dirmngr
     apt:
       name: dirmngr
@@ -102,11 +107,23 @@
         iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination 10.0.3.101  
         iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 81 -j DNAT --to-destination 10.0.3.102
         iptables -L -t nat 
+  
+  - name: Download playbook for lxc
+    get_url:
+      url: https://raw.githubusercontent.com/KatJIeTTo/devops-hometask/main/task-03/02/playbooklxc.yml
+      dest: /home/vagrant/playbooklxc.yml
+  
+  - name: Download inventory
+    get_url:
+      url: https://raw.githubusercontent.com/KatJIeTTo/devops-hometask/main/task-03/02/inventory
+      dest: /home/vagrant/inventory
 
+  
   - name: Start lxc playbook
     shell:
       cmd: | 
-        ansible-playbook --connection=local --inventory 127.0.0.1, playbooklxc.yml
+        ansible-playbook -i /home/vagrant/inventory /home/vagrant/playbooklxc.yml
+    
         
-  - debug: var=output.stdout_lines
+  
 

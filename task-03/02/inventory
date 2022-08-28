@@ -1,4 +1,4 @@
-localhost
+192.168.10.13
 
 [all:vars]
 ansible_connection=ssh
