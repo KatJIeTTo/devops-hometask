@@ -1,0 +1,22 @@
+---
+- name: Lxc Install and configurate
+  hosts: all
+  become: yes
+
+  tasks:
+
+  - name: Lxc create c1
+    lxc_container:
+       name: c1
+       container_log: true
+       template: download
+       state: stopped
+       template_options: --dist centos --release 8-Stream --arch amd64 --no-validate 
+
+  - name: Lxc create c2
+    lxc_container:
+       name: c2
+       container_log: true
+       template: download
+       state: stopped
+       template_options: --dist centos --release 8-Stream --arch amd64 --no-validate 

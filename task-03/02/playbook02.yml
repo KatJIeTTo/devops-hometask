@@ -1,0 +1,112 @@
+---
+- name: Playbook config VM 02
+  hosts: all
+  become: yes
+
+  tasks:
+
+  - name: Get update
+    apt:
+      update_cache: yes
+
+  - name: Uninstall gnupg
+    apt:
+      name: gnupg
+      state: absent
+
+  - name: Install gnupg2
+    apt:
+      name: gnupg2
+      state: latest
+
+  - name: Install dirmngr
+    apt:
+      name: dirmngr
+      state: latest
+
+  - name: Install mc
+    apt:
+      name: mc
+      state: latest
+
+  - name: Install lxc 
+    apt:
+      name: lxc
+      state: latest
+
+  - name: Install lxc templates
+    apt:
+      name: lxc-templates
+      state: latest
+
+  - name: Install bridge utils
+    apt:
+      name: bridge-utils
+      state: latest
+
+  - name: Create directory lxc config
+    file:
+      path: /home/vagrant/.config/lxc
+      state: directory
+      mode: '0777'
+    
+  - name: Create config file for lxc
+    shell:
+      cmd: |
+          cat > /home/vagrant/.config/lxc/root.conf << EOF
+          lxc.net.0.type = veth
+          lxc.net.0.flags = up
+          lxc.net.0.link = lxcbr0
+          lxc.start.auto = 1
+          EOF
+
+  - name: Create lxc dhcp conf
+    shell:
+      cmd: |
+          cat > /home/vagrant/.config/lxc/lxc-dhcp.conf << EOF
+          dhcp-host=c1,10.0.3.101
+          dhcp-host=c2,10.0.3.102
+          EOF
+
+  - name: Add sys kernel
+    shell: |
+      echo kernel.unprivileged_userns_clone=1 >> /etc/sysctl.conf
+
+  - name: Create lxc net
+    shell:
+      cmd: |
+          cat > /etc/default/lxc-net <<EOF
+          USE_LXC_BRIDGE="true"
+          LXC_BRIDGE="lxcbr0"
+          LXC_ADDR="10.0.3.1"
+          LXC_NETMASK="255.255.255.0"
+          LXC_NETWORK="10.0.3.0/24"
+          LXC_DHCP_RANGE="10.0.3.200,10.0.3.254"
+          LXC_DHCP_MAX="253"
+          LXC_DHCP_CONFILE="/home/vagrant/.config/lxc/lxc-dhcp.conf"
+          LXC_DOMAIN=""
+          EOF
+
+  - name: Enable lxc net
+    systemd:
+      name: lxc-net.service
+      enabled: yes
+
+  - name: Start lxc net
+    systemd:
+      name: lxc-net
+      state: started
+
+  - name: iptable routing
+    shell: | 
+        iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination 10.0.3.101  
+        iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 81 -j DNAT --to-destination 10.0.3.102
+        iptables -L -t nat 
+
+  - name: Start lxc playbook
+    shell:
+      cmd: | 
+        ansible-playbook --connection=local --inventory 127.0.0.1, playbooklxc.yml
+        
+  - debug: var=output.stdout_lines
+
