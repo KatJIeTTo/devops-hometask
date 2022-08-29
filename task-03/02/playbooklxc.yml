@@ -24,3 +24,85 @@
        config: /home/vagrant/.config/lxc/root.conf
        state: stopped
        template_options: --dist centos --release 8-Stream --arch amd64 --no-validate --keyserver "hkp://keyserver.ubuntu.com"
+
+  - name: Add static c1
+    become: yes
+    blockinfile:
+      path: /var/lib/lxc/c1/config
+      block: |
+         lxc.net.0.ipv4.address = 10.0.3.101/24
+         lxc.net.0.ipv4.gateway = 10.0.3.1
+    
+  - name: Add static c2
+    become: yes
+    blockinfile:
+      path: /var/lib/lxc/c2/config
+      block: |
+         lxc.net.0.ipv4.address = 10.0.3.102/24
+         lxc.net.0.ipv4.gateway = 10.0.3.1
+
+  - name: start lxc
+    become: yes
+    service:
+      name: lxc
+      state: started
+
+  - name: Install httpd for c1
+    lxc_container:
+      name: c1
+      state: started
+      container_command: |
+        sleep 15
+        yum install httpd -y
+        systemctl enable httpd
+        systemctl start httpd
+
+  - name: Install php for c2
+    lxc_container:
+      name: c2
+      state: started
+      container_command: |
+        sleep 15
+        yum update
+        yum install httpd -y
+        yum install php -y
+        systemctl enable httpd
+        systemctl start httpd
+
+  - name: Download httpd conf
+    get_url:
+      url: https://raw.githubusercontent.com/KatJIeTTo/devops-hometask/main/task-02/httpd.conf
+      dest: /home/vagrant/httpd.conf
+
+  - name: Download info php
+    get_url:
+      url: https://raw.githubusercontent.com/KatJIeTTo/devops-hometask/main/task-02/info.php
+      dest: /home/vagrant/info.php
+
+  - name: Remove file httpd conf from c2
+    ansible.builtin.file:
+    path: /var/lib/lxc/c2/rootfs/etc/httpd/conf/httpd.conf
+    state: absent     
+
+- name: Copy httpd conf 
+  ansible.builtin.copy:
+    src: /home/vagrant/httpd.conf
+    dest: /var/lib/lxc/c2/rootfs/etc/httpd/conf/
+    owner: root
+    group: root
+    mode: '0777'
+
+- name: Copy info php 
+  ansible.builtin.copy:
+    src: /home/vagrant/info.php
+    dest: /var/lib/lxc/c2/rootfs/var/www/html/
+    owner: root
+    group: root
+    mode: '0777'
+
+- name: Install php for c2
+  lxc_container:
+    name: c2
+    state: started
+    container_command: |
+     systemctl restart httpd
