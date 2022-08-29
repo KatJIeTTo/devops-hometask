@@ -14,6 +14,9 @@
        template: download
        state: started
        template_options: --dist centos --release 8-Stream --arch amd64 --no-validate --keyserver "hkp://keyserver.ubuntu.com"
+       container_comand: |
+         sudo yum install -y httpd
+         systemctl start httpd
 
   - name: Lxc create c2
     become: yes
