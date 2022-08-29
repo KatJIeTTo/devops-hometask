@@ -80,29 +80,29 @@
       dest: /home/vagrant/info.php
 
   - name: Remove file httpd conf from c2
-    ansible.builtin.file:
-    path: /var/lib/lxc/c2/rootfs/etc/httpd/conf/httpd.conf
-    state: absent     
+    file:
+      path: /var/lib/lxc/c2/rootfs/etc/httpd/conf/httpd.conf
+      state: absent     
 
-- name: Copy httpd conf 
-  ansible.builtin.copy:
-    src: /home/vagrant/httpd.conf
-    dest: /var/lib/lxc/c2/rootfs/etc/httpd/conf/
-    owner: root
-    group: root
-    mode: '0777'
+  - name: Copy httpd conf 
+    copy:
+      src: /home/vagrant/httpd.conf
+      dest: /var/lib/lxc/c2/rootfs/etc/httpd/conf/
+      owner: root
+      group: root
+      mode: '0777'
 
-- name: Copy info php 
-  ansible.builtin.copy:
-    src: /home/vagrant/info.php
-    dest: /var/lib/lxc/c2/rootfs/var/www/html/
-    owner: root
-    group: root
-    mode: '0777'
+  - name: Copy info php 
+    ansible.builtin.copy:
+      src: /home/vagrant/info.php
+      dest: /var/lib/lxc/c2/rootfs/var/www/html/
+      owner: root
+      group: root
+      mode: '0777'
 
-- name: Install php for c2
-  lxc_container:
-    name: c2
-    state: started
-    container_command: |
-     systemctl restart httpd
+  - name: Install php for c2
+    lxc_container:
+      name: c2
+      state: started
+      container_command: |
+        systemctl restart httpd
