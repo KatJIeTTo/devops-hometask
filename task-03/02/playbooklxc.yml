@@ -11,9 +11,8 @@
        name: c1
        container_log: true
        template: download
+       conf: home/vagrant/.config/lxc/root.conf       
        state: started
-       conf: 
-         home/vagrant/.config/lxc/root.conf
        template_options: --dist centos --release 8-Stream --arch amd64 --no-validate --keyserver "hkp://keyserver.ubuntu.com"
        container_comand: |
          sudo yum install -y httpd
